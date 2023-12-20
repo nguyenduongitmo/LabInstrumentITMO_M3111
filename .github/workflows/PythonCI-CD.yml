@@ -40,7 +40,7 @@ jobs:
         python -m pip install --upgrade pip
     - name: Check for Errors
       if: ${{ failure() }}
-        run: echo "There were errors in the workflow."
+      run: echo "There were errors in the workflow."
 
     - name: Upload Test Results
       if: always()
