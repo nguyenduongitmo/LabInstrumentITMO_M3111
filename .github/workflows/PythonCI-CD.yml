@@ -1,53 +1,50 @@
-name: Python CI/CD
+name: CI - Run Unit Test
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.8
-        
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Run Unit Tests
-      run: |
-        python -m unittest discover -s tests -p '*_test.py'
-
-    - name: Check pip version
-      run: |
-        python -m pip install --upgrade pip
-    - name: Check for Errors
-      if: ${{ failure() }}
-      run: echo "There were errors in the workflow."
-
-    - name: Upload Test Results
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: test-results
-        path: test-results/
+      - name: Check out Repository
+        uses: actions/checkout@v4
+     
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      # You can test your matrix by printing the current Python version
+      
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
 
 
+      - name: Set up Python
+        uses: actions/setup-python@v4.7.1
+        with:
+          python-version: 3.8
 
+      - name: Run My Step
+        id: myStep
+        run: echo "::set-output name=myOutput::some value"
+
+      - name: Set Output Variable
+        run: echo "myOutput=${{ steps.myStep.outputs.myOutput }}" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: |
+          echo "there's no depencies"
+
+      - name: Run Unit Tests
+        run: |
+          # pip test
+          python -m unittest discover -s tests -p '*_test.py'
